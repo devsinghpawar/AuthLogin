@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import Button from "../Ui/Button";
 import Input from "./Input";
@@ -81,6 +81,7 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
             isInvalid={passwordsDontMatch}
           />
         )}
+
         <View style={styles.buttons}>
           <Button onPress={submitHandler}>
             {isLogin ? "Log In" : "Sign Up"}

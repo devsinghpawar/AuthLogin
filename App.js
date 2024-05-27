@@ -1,21 +1,57 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SplashScreen from "expo-splash-screen";
+// import { ClerkProvider, SignedIn, SignedOut, useAuth } from "@clerk/clerk-expo";
+// import * as SecureStore from "expo-secure-store";
 
 import LoginScreen from "./screens/LoginScreen";
 import SignupScreen from "./screens/SignupScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { Colors } from "./constants/styles";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import IconButton from "./components/Ui/IconButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SplashScreen from "expo-splash-screen";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
+
+// const tokenCache = {
+//   async getToken(key) {
+//     try {
+//       return SecureStore.getItemAsync(key);
+//     } catch (err) {
+//       return null;
+//     }
+//   },
+//   async saveToken(key, value) {
+//     try {
+//       return SecureStore.setItemAsync(key, value);
+//     } catch (err) {
+//       return;
+//     }
+//   },
+// };
+
+// const SignOut = () => {
+//   const { isLoaded, signOut } = useAuth();
+//   if (!isLoaded) {
+//     return null;
+//   }
+//   return (
+//     <View>
+//       <Button
+//         title="Sign Out"
+//         onPress={() => {
+//           signOut();
+//         }}
+//       />
+//     </View>
+//   );
+// };
 
 function AuthStack() {
   return (
@@ -34,6 +70,10 @@ function AuthStack() {
 
 function AuthenticatedStack() {
   const authCtx = useContext(AuthContext);
+  // const { isLoaded, signOut } = useAuth();
+  // if (!isLoaded) {
+  //   return null;
+  // }
 
   return (
     <Stack.Navigator
@@ -48,12 +88,22 @@ function AuthenticatedStack() {
         component={WelcomeScreen}
         options={{
           headerRight: ({ tintColor }) => (
-            <IconButton
-              icon="exit"
-              color={tintColor}
-              size={24}
-              onPress={authCtx.logout}
-            />
+            <>
+              <IconButton
+                icon="exit"
+                color={tintColor}
+                size={24}
+                onPress={authCtx.logout}
+              />
+              {/* <IconButton
+                icon="exit"
+                color={tintColor}
+                size={24}
+                onPress={() => {
+                  signOut();
+                }}
+              /> */}
+            </>
           ),
         }}
       />
@@ -65,10 +115,28 @@ function Navigation() {
   const authCtx = useContext(AuthContext);
 
   return (
-    <NavigationContainer>
-      {!authCtx.isAuthenticated && <AuthStack />}
-      {authCtx.isAuthenticated && <AuthenticatedStack />}
-    </NavigationContainer>
+    <>
+      <NavigationContainer>
+        {authCtx.isAuthenticated && <AuthenticatedStack />}
+        {!authCtx.isAuthenticated && <AuthStack />}
+      </NavigationContainer>
+
+      {/* <ClerkProvider
+        tokenCache={tokenCache}
+        publishableKey="pk_test_YWRqdXN0ZWQtY2FyaWJvdS0wLmNsZXJrLmFjY291bnRzLmRldiQ"
+      >
+        <NavigationContainer>
+          {authCtx.isAuthenticated && <AuthenticatedStack />}
+          <SignedIn>
+            <AuthenticatedStack />
+          </SignedIn>
+          <SignedOut>
+            {/* <AuthStack /> */}
+      {/* {!authCtx.isAuthenticated && <AuthStack />}
+          </SignedOut>
+        </NavigationContainer>
+      </ClerkProvider> */}
+    </>
   );
 }
 
@@ -87,6 +155,7 @@ function Root() {
       setIsTryingLogin(false);
     }
     fetchToken();
+    console.log("Hello");
   }, []);
 
   useEffect(() => {
